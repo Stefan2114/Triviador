@@ -47,7 +47,14 @@ function QuestionForm({
     >
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Special handling for difficulty to ensure it's a number
+    const processedValue = name === "difficulty" ? Number(value) : value;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: processedValue,
+    }));
   };
 
   const handleWrongAnswerChange = (index: number, value: string) => {
@@ -83,7 +90,7 @@ function QuestionForm({
     const submittedQuestion: Question = {
       id: initialQuestion?.id || Date.now(),
       questionText: formData.questionText.trim(),
-      category: formData.category as "math" | "football",
+      category: formData.category.toLowerCase() as "math" | "football",
       type: formData.type as "multi-choice" | "open-ended",
       correctAnswer: formData.correctAnswer.trim(),
       wrongAnswers:

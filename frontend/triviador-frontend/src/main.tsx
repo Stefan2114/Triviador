@@ -7,6 +7,7 @@ import NotFoundPage from "./pages/NotFoundPage.tsx";
 import { QuestionProvider } from "./context/QuestionProvider.tsx";
 import AddQuestionPage from "./pages/AddQuestionPage.tsx";
 import EditQuestionPage from "./pages/EditQuestionPage.tsx";
+import QuestionGenerator from "./generators/QuestionGenerator.tsx";
 
 const router = createBrowserRouter([
   {
@@ -35,6 +36,7 @@ const router = createBrowserRouter([
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QuestionProvider>
+      <QuestionGenerator />
       <RouterProvider router={router} />
     </QuestionProvider>
   </StrictMode>

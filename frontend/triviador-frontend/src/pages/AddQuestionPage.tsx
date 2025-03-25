@@ -16,7 +16,21 @@ function AddQuestionPage() {
   const { addQuestion } = questionContext;
 
   const handleAddQuestion = (newQuestion: Question) => {
+    // Validate the question before adding
+    if (!newQuestion.questionText.trim()) {
+      alert("Question text is required!");
+      return;
+    }
+
+    if (!newQuestion.correctAnswer.trim()) {
+      alert("Correct answer is required!");
+      return;
+    }
+
+    // Add the question
     addQuestion(newQuestion);
+
+    // Navigate back to questions page
     navigate("/questions");
   };
 

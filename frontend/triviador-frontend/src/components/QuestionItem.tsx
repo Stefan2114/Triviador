@@ -36,7 +36,7 @@ const QuestionItem: React.FC<QuestionItemProps> = ({
             </span>
             <span className="detail-item">
               <span className="detail-label">Difficulty:</span>
-              <span className="detail-value">{question.difficulty}/3</span>
+              <span className="detail-value">{question.difficulty}</span>
             </span>
           </div>
           <button

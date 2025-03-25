@@ -19,6 +19,10 @@ const QuestionsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const questionsPerPage = 10;
 
+  if (questions.length === 0) {
+    return <div>Loading questions...</div>;
+  }
+
   // Dynamically extract unique categories and types
   const uniqueCategories = useMemo(() => {
     return [...new Set(questions.map((q) => q.category))];
@@ -69,29 +73,74 @@ const QuestionsPage = () => {
   // Calculate total pages
   const totalPages = Math.ceil(sortedQuestions.length / questionsPerPage);
 
+  // Enhanced pagination render helper
+  const renderPagination = () => {
+    const pages: React.ReactNode[] = [];
+    const maxPagesToShow = 7; // Total pages to show including first, last, and ellipses
+
+    // Helper to add page button
+    const addPageButton = (pageNumber: number) => {
+      pages.push(
+        <button
+          key={pageNumber}
+          onClick={() => handlePageChange(pageNumber)}
+          className={currentPage === pageNumber ? "active-page" : ""}
+        >
+          {pageNumber}
+        </button>
+      );
+    };
+
+    // Add ellipsis button
+    const addEllipsis = (key: string) => {
+      pages.push(
+        <span key={key} className="pagination-ellipsis">
+          ...
+        </span>
+      );
+    };
+
+    // If total pages are less than or equal to max pages to show, show all
+    if (totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= totalPages; i++) {
+        addPageButton(i);
+      }
+    } else {
+      // Always show first page
+      addPageButton(1);
+
+      // Determine start and end range
+      let startPage = Math.max(2, currentPage - 1);
+      let endPage = Math.min(totalPages - 1, currentPage + 1);
+
+      // Add first ellipsis if needed
+      if (currentPage > 3) {
+        addEllipsis("start-ellipsis");
+      }
+
+      // Show pages around current page
+      for (let i = startPage; i <= endPage; i++) {
+        addPageButton(i);
+      }
+
+      // Add last ellipsis if needed
+      if (currentPage < totalPages - 2) {
+        addEllipsis("end-ellipsis");
+      }
+
+      // Always show last page
+      addPageButton(totalPages);
+    }
+
+    return pages;
+  };
+
   const handleQuestionClick = (questionId: number) => {
     navigate(`/questions/${questionId}`);
   };
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
-  };
-
-  // Pagination render helper
-  const renderPagination = () => {
-    const pages = [];
-    for (let i = 1; i <= totalPages; i++) {
-      pages.push(
-        <button
-          key={i}
-          onClick={() => handlePageChange(i)}
-          className={currentPage === i ? "active-page" : ""}
-        >
-          {i}
-        </button>
-      );
-    }
-    return pages;
   };
 
   // Filter change handlers
@@ -122,10 +171,17 @@ const QuestionsPage = () => {
     setOrderBy(e.target.value);
   };
 
+  // New handler for creating a new question
+  const handleCreateQuestion = () => {
+    navigate("/questions/add");
+  };
+
   return (
     <div className="questions-container">
       <div className="sidebar">
-        <button className="create-button">Create Question</button>
+        <button className="create-button" onClick={handleCreateQuestion}>
+          Create Question
+        </button>
 
         <div className="filter-section">
           <h3>Categories</h3>
