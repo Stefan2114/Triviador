@@ -4,6 +4,7 @@ import { QuestionContext } from "../context/QuestionProvider";
 import { Question } from "../types/question";
 import QuestionStatisticsCharts from "../components/QuestionStatisticsCharts";
 import "../styles/QuestionsPage.css";
+import QuestionItem from "../components/QuestionItem";
 
 const QuestionsPage = () => {
   const questionContext = useContext(QuestionContext);
@@ -30,6 +31,13 @@ const QuestionsPage = () => {
 
   const uniqueTypes = useMemo(() => {
     return [...new Set(questions.map((q) => q.type))];
+  }, [questions]);
+
+  const difficultyCounts = useMemo(() => {
+    return questions.reduce((acc, question) => {
+      acc[question.difficulty] = (acc[question.difficulty] || 0) + 1;
+      return acc;
+    }, {} as Record<number, number>);
   }, [questions]);
 
   // Filtering logic
@@ -235,38 +243,14 @@ const QuestionsPage = () => {
             <option value="date">Sort by Date</option>
           </select>
         </div>
-
         <div className="questions-list">
           {paginatedQuestions.map((question) => (
-            <div key={question.id} className="question-item">
-              <div className="question-content">
-                <h2 className="question-text">{question.questionText}</h2>
-                <div className="question-footer">
-                  <div className="question-details">
-                    <div className="detail-item">
-                      <span className="detail-label">Category:</span>
-                      <span className="detail-value">{question.category}</span>
-                    </div>
-                    <div className="detail-item">
-                      <span className="detail-label">Type:</span>
-                      <span className="detail-value">{question.type}</span>
-                    </div>
-                    <div className="detail-item">
-                      <span className="detail-label">Difficulty:</span>
-                      <span className="detail-value">
-                        {question.difficulty}
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    className="see-more-btn"
-                    onClick={() => handleQuestionClick(question.id)}
-                  >
-                    See more info
-                  </button>
-                </div>
-              </div>
-            </div>
+            <QuestionItem
+              key={question.id}
+              question={question}
+              onSeeMoreClick={handleQuestionClick}
+              difficultyCounts={difficultyCounts}
+            />
           ))}
         </div>
 
