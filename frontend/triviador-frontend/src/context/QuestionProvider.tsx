@@ -4,8 +4,8 @@ import { Question } from "../types/question";
 interface QuestionContextType {
   questions: Question[];
   addQuestion: (question: Question) => void;
-  deleteQuestion?: (id: number) => void;
-  updateQuestion?: (question: Question) => void;
+  deleteQuestion: (id: number) => void;
+  updateQuestion: (question: Question) => void;
 }
 
 export const QuestionContext = createContext<QuestionContextType | undefined>(

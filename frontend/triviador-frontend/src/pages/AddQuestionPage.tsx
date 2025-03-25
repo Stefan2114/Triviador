@@ -22,9 +22,7 @@ function AddQuestionPage() {
 
   return (
     <div className="add-question-page-container">
-      <div className="add-question-content">
-        <QuestionForm onSubmit={handleAddQuestion} mode="add" />
-      </div>
+      <QuestionForm onSubmit={handleAddQuestion} mode="add" />
     </div>
   );
 }

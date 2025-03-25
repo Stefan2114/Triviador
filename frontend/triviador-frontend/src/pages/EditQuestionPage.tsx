@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import QuestionForm from "../components/QuestionForm";
 import { QuestionContext } from "../context/QuestionProvider";
 import { Question } from "../types/question";
-import "../styles/EditQuestionPage.css";
 
 function EditQuestionPage() {
   const { id } = useParams<{ id: string }>();

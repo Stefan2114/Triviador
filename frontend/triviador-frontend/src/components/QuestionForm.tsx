@@ -22,7 +22,7 @@ function QuestionForm({
       ? [...initialQuestion.wrongAnswers, "", ""].slice(0, 2)
       : ["", ""],
     difficulty: initialQuestion?.difficulty || 1,
-    date: initialQuestion?.date || new Date(), // Use Date object
+    date: initialQuestion?.date || new Date(),
   });
 
   useEffect(() => {
@@ -36,13 +36,15 @@ function QuestionForm({
           ? [...initialQuestion.wrongAnswers, "", ""].slice(0, 2)
           : ["", ""],
         difficulty: initialQuestion.difficulty,
-        date: initialQuestion.date, // Directly use the Date object
+        date: initialQuestion.date,
       });
     }
   }, [initialQuestion]);
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -89,55 +91,125 @@ function QuestionForm({
           ? formData.wrongAnswers.filter((answer) => answer.trim() !== "")
           : undefined,
       difficulty: Number(formData.difficulty) as 1 | 2 | 3,
-      date: new Date(), // Always use current date as Date object
+      date: new Date(),
     };
 
     onSubmit(submittedQuestion);
   };
 
-  // If you want to show the date in the form, you'll need to format it
-  const formatDate = (date: Date) => {
-    return date.toISOString().split("T")[0];
-  };
-
   return (
     <div className="question-form-container">
       <form onSubmit={handleSubmit} className="question-form">
-        <h2 className="form-title">
-          {mode === "add" ? "Add New Question" : "Edit Question"}
-        </h2>
+        <div className="form-content">
+          <div className="form-sidebar">
+            <div className="category-section">
+              <h3>Category</h3>
+              <div className="category-options">
+                {["Football", "Math"].map((cat) => (
+                  <div key={cat} className="category-option">
+                    <input
+                      type="radio"
+                      id={cat.toLowerCase()}
+                      name="category"
+                      value={cat.toLowerCase()}
+                      checked={formData.category === cat.toLowerCase()}
+                      onChange={handleInputChange}
+                    />
+                    <label htmlFor={cat.toLowerCase()}>{cat}</label>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-        <div className="form-grid">
-          {/* Optional: If you want to display the date */}
-          <div className="form-row">
-            <label>Date</label>
-            <input
-              type="date"
-              value={formatDate(formData.date)}
-              readOnly // Make it read-only since we're auto-assigning the date
-              className="read-only-date"
-            />
+            <div className="difficulty-section">
+              <h3>Difficulty</h3>
+              <div className="difficulty-options">
+                {[1, 2, 3].map((diff) => (
+                  <div key={diff} className="difficulty-option">
+                    <input
+                      type="radio"
+                      id={`difficulty-${diff}`}
+                      name="difficulty"
+                      value={diff}
+                      checked={formData.difficulty === diff}
+                      onChange={handleInputChange}
+                    />
+                    <label htmlFor={`difficulty-${diff}`}>
+                      {diff === 1 ? "Easy" : diff === 2 ? "Medium" : "Hard"}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
-          {/* Rest of the form remains the same */}
-          <div className="form-row">
-            <label>Category</label>
-            <select
-              name="category"
-              value={formData.category}
-              onChange={handleInputChange}
-            >
-              <option value="math">Math</option>
-              <option value="football">Football</option>
-            </select>
-          </div>
+          <div className="form-main-content">
+            <div className="question-section">
+              <label>Question:</label>
+              <textarea
+                name="questionText"
+                placeholder="type..."
+                value={formData.questionText}
+                onChange={handleInputChange}
+                className="question-text-input"
+              />
+            </div>
 
-          {/* ... other form fields ... */}
+            <div className="type-section">
+              <label>Answer type:</label>
+              <div className="type-options">
+                {["open-ended", "multi-choice"].map((type) => (
+                  <div key={type} className="type-option">
+                    <input
+                      type="radio"
+                      id={type}
+                      name="type"
+                      value={type}
+                      checked={formData.type === type}
+                      onChange={handleInputChange}
+                    />
+                    <label htmlFor={type}>
+                      {type === "open-ended" ? "Open-ended" : "Multiple Choice"}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="correct-answer-section">
+              <label>Correct answer:</label>
+              <textarea
+                name="correctAnswer"
+                placeholder="type..."
+                value={formData.correctAnswer}
+                onChange={handleInputChange}
+                className="answer-input"
+              />
+            </div>
+
+            {formData.type === "multi-choice" && (
+              <div className="wrong-answers-section">
+                {[0, 1].map((index) => (
+                  <div key={index} className="wrong-answer-input">
+                    <label>Wrong answer:</label>
+                    <textarea
+                      placeholder="type..."
+                      value={formData.wrongAnswers[index]}
+                      onChange={(e) =>
+                        handleWrongAnswerChange(index, e.target.value)
+                      }
+                      className="answer-input"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <button type="submit" className="submit-button">
+              {mode === "add" ? "Add Question" : "Update Question"}
+            </button>
+          </div>
         </div>
-
-        <button type="submit" className="submit-button">
-          {mode === "add" ? "Add Question" : "Update Question"}
-        </button>
       </form>
     </div>
   );

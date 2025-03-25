@@ -1,59 +1,103 @@
-import { useContext, useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import QuestionForm from "../components/QuestionForm";
+import React from "react";
+import { useContext } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { QuestionContext } from "../context/QuestionProvider";
-import { Question } from "../types/question";
 import "../styles/QuestionPage.css";
 
-function EditQuestionPage() {
+const QuestionPage: React.FC = () => {
+  const questionContext = useContext(QuestionContext);
+  if (!questionContext) throw new Error("QuestionContext not found");
+
+  const { questions, deleteQuestion } = questionContext;
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const questionContext = useContext(QuestionContext);
 
-  if (!questionContext) {
-    throw new Error("QuestionContext must be used within a QuestionProvider");
+  // Find the question using the id from the URL parameters
+  const question = questions.find((q) => q.id === Number(id));
+
+  if (!question) {
+    return (
+      <div className="question-not-found">
+        <h1>Question not found.</h1>
+        <Link to="/questions" className="back-button">
+          Back to Questions
+        </Link>
+      </div>
+    );
   }
 
-  const { questions, updateQuestion } = questionContext;
-  const [currentQuestion, setCurrentQuestion] = useState<Question | undefined>(
-    undefined
-  );
-
-  useEffect(() => {
-    // Find the question to edit
-    const questionToEdit = questions.find((q) => q.id === Number(id));
-
-    if (!questionToEdit) {
-      // Redirect if question not found
-      navigate("/questions");
-      return;
-    }
-
-    setCurrentQuestion(questionToEdit);
-  }, [id, questions, navigate]);
-
-  const handleUpdateQuestion = (updatedQuestion: Question) => {
-    if (updateQuestion) {
-      updateQuestion(updatedQuestion);
+  const handleDeleteQuestion = () => {
+    if (
+      deleteQuestion &&
+      window.confirm("Are you sure you want to delete this question?")
+    ) {
+      deleteQuestion(Number(id));
       navigate("/questions");
     }
   };
 
-  if (!currentQuestion) {
-    return <div>Loading...</div>;
-  }
-
   return (
-    <div className="edit-question-page-container">
-      <div className="edit-question-content">
-        <QuestionForm
-          initialQuestion={currentQuestion}
-          onSubmit={handleUpdateQuestion}
-          mode="edit"
-        />
+    <div className="question-detail-container">
+      <div className="question-content">
+        <div className="question-details">
+          <div className="question-left-panel">
+            <div className="question-category">
+              <h2>Category</h2>
+              <p>{question.category}</p>
+            </div>
+            <div className="question-difficulty">
+              <h2>Difficulty</h2>
+              <p>{question.difficulty}</p>
+            </div>
+          </div>
+          <div className="question-right-panel">
+            <h1 className="question-text">{question.questionText}</h1>
+            <div className="question-type">
+              <h2>Question Type</h2>
+              <p>{question.type}</p>
+            </div>
+            <div className="question-answers">
+              <h2>Answers</h2>
+              {question.type === "multi-choice" ? (
+                <>
+                  <div className="correct-answer">
+                    <h3>Correct Answer</h3>
+                    <p>{question.correctAnswer}</p>
+                  </div>
+                  {question.wrongAnswers && (
+                    <div className="wrong-answers">
+                      <h3>Wrong Answers</h3>
+                      <ul>
+                        {question.wrongAnswers.map((answer, index) => (
+                          <li key={index}>{answer}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="correct-answer">
+                  <h3>Answer</h3>
+                  <p>{question.correctAnswer}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="question-actions">
+          <Link to={`/questions/edit/${question.id}`} className="edit-button">
+            Edit Question
+          </Link>
+          <button onClick={handleDeleteQuestion} className="delete-button">
+            Delete Question
+          </button>
+          <Link to="/questions" className="back-button">
+            Back to Questions
+          </Link>
+        </div>
       </div>
     </div>
   );
-}
+};
 
-export default EditQuestionPage;
+export default QuestionPage;

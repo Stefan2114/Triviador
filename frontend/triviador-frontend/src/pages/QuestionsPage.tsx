@@ -1,7 +1,8 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { QuestionContext } from "../context/QuestionProvider";
-import QuestionItem from "../components/QuestionItem";
+import { Question } from "../types/question";
+import QuestionStatisticsCharts from "../components/QuestionStatisticsCharts";
 import "../styles/QuestionsPage.css";
 
 const QuestionsPage = () => {
@@ -15,140 +16,210 @@ const QuestionsPage = () => {
   const [typeFilter, setTypeFilter] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [orderBy, setOrderBy] = useState("difficulty");
+  const [currentPage, setCurrentPage] = useState(1);
+  const questionsPerPage = 10;
 
-  const handleCreateQuestionClick = () => {
-    navigate(`/questions/add`);
-  };
+  // Dynamically extract unique categories and types
+  const uniqueCategories = useMemo(() => {
+    return [...new Set(questions.map((q) => q.category))];
+  }, [questions]);
+
+  const uniqueTypes = useMemo(() => {
+    return [...new Set(questions.map((q) => q.type))];
+  }, [questions]);
+
+  // Filtering logic
+  const filteredQuestions = useMemo(() => {
+    return questions.filter((question) => {
+      const categoryMatch =
+        categoryFilter.length === 0 ||
+        categoryFilter.includes(question.category);
+
+      const typeMatch =
+        typeFilter.length === 0 || typeFilter.includes(question.type);
+
+      const searchMatch = question.questionText
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
+      return categoryMatch && typeMatch && searchMatch;
+    });
+  }, [questions, categoryFilter, typeFilter, searchTerm]);
+
+  // Sorting logic
+  const sortedQuestions = useMemo(() => {
+    return [...filteredQuestions].sort((a, b) => {
+      switch (orderBy) {
+        case "difficulty":
+          return a.difficulty - b.difficulty;
+        case "date":
+          return new Date(a.date).getTime() - new Date(b.date).getTime();
+        default:
+          return a.id - b.id;
+      }
+    });
+  }, [filteredQuestions, orderBy]);
+
+  // Pagination logic
+  const paginatedQuestions = useMemo(() => {
+    const startIndex = (currentPage - 1) * questionsPerPage;
+    return sortedQuestions.slice(startIndex, startIndex + questionsPerPage);
+  }, [sortedQuestions, currentPage, questionsPerPage]);
+
+  // Calculate total pages
+  const totalPages = Math.ceil(sortedQuestions.length / questionsPerPage);
 
   const handleQuestionClick = (questionId: number) => {
     navigate(`/questions/${questionId}`);
   };
 
-  // Filtering logic
-  const filteredQuestions = questions.filter((question) => {
-    const categoryMatch =
-      categoryFilter.length === 0 || categoryFilter.includes(question.category);
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
 
-    const typeMatch =
-      typeFilter.length === 0 || typeFilter.includes(question.type);
-
-    const searchMatch = question.questionText
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-
-    return categoryMatch && typeMatch && searchMatch;
-  });
-
-  // Sorting logic
-  const sortedQuestions = [...filteredQuestions].sort((a, b) => {
-    switch (orderBy) {
-      case "difficulty":
-        return a.difficulty - b.difficulty;
-      case "date":
-        return a.date.getTime() - b.date.getTime();
-      default:
-        return a.id - b.id;
-    }
-  });
-
-  return (
-    <div className="questions-container">
-      {/* Sidebar with Filters */}
-      <div className="sidebar">
+  // Pagination render helper
+  const renderPagination = () => {
+    const pages = [];
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(
         <button
-          className="create-button"
-          onClick={() => handleCreateQuestionClick()}
+          key={i}
+          onClick={() => handlePageChange(i)}
+          className={currentPage === i ? "active-page" : ""}
         >
-          Create new question
+          {i}
         </button>
+      );
+    }
+    return pages;
+  };
 
-        <div className="filter-section">
-          <h3>Type</h3>
-          <div className="filter-checkbox">
-            <input
-              type="checkbox"
-              checked={typeFilter.includes("multi-choice")}
-              onChange={() => handleTypeFilterChange("multi-choice")}
-            />
-            <label>Multiple Choice Question</label>
-          </div>
-          <div className="filter-checkbox">
-            <input
-              type="checkbox"
-              checked={typeFilter.includes("open-ended")}
-              onChange={() => handleTypeFilterChange("open-ended")}
-            />
-            <label>Open-ended</label>
-          </div>
-        </div>
-
-        <div className="filter-section">
-          <h3>Category</h3>
-          {["Math", "Football"].map((category) => (
-            <div key={category} className="filter-checkbox">
-              <input
-                type="checkbox"
-                checked={categoryFilter.includes(category.toLowerCase())}
-                onChange={() =>
-                  handleCategoryFilterChange(category.toLowerCase())
-                }
-              />
-              <label>{category}</label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="main-content">
-        {/* Search and Sort */}
-        <div className="search-and-sort">
-          <div className="search-container">
-            <input
-              type="text"
-              placeholder="Search"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <select
-            className="order-by-select"
-            value={orderBy}
-            onChange={(e) => setOrderBy(e.target.value)}
-          >
-            <option value="difficulty">Order By Difficulty</option>
-            <option value="date">Order By Date</option>
-          </select>
-        </div>
-
-        {/* Questions List */}
-        <div className="questions-list">
-          {sortedQuestions.map((question) => (
-            <QuestionItem
-              key={question.id}
-              question={question}
-              onSeeMoreClick={handleQuestionClick}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  // Helper functions
-  function handleCategoryFilterChange(category: string) {
+  // Filter change handlers
+  const handleCategoryFilterChange = (category: string) => {
     setCategoryFilter((prev) =>
       prev.includes(category)
         ? prev.filter((c) => c !== category)
         : [...prev, category]
     );
-  }
+    setCurrentPage(1);
+  };
 
-  function handleTypeFilterChange(type: string) {
+  const handleTypeFilterChange = (type: string) => {
     setTypeFilter((prev) =>
       prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
     );
-  }
+    setCurrentPage(1);
+  };
+
+  // Search handler
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+
+  // Order by handler
+  const handleOrderByChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setOrderBy(e.target.value);
+  };
+
+  return (
+    <div className="questions-container">
+      <div className="sidebar">
+        <button className="create-button">Create Question</button>
+
+        <div className="filter-section">
+          <h3>Categories</h3>
+          {uniqueCategories.map((category) => (
+            <div key={category} className="filter-checkbox">
+              <input
+                type="checkbox"
+                id={`category-${category}`}
+                checked={categoryFilter.includes(category)}
+                onChange={() => handleCategoryFilterChange(category)}
+              />
+              <label htmlFor={`category-${category}`}>{category}</label>
+            </div>
+          ))}
+        </div>
+
+        <div className="filter-section">
+          <h3>Question Types</h3>
+          {uniqueTypes.map((type) => (
+            <div key={type} className="filter-checkbox">
+              <input
+                type="checkbox"
+                id={`type-${type}`}
+                checked={typeFilter.includes(type)}
+                onChange={() => handleTypeFilterChange(type)}
+              />
+              <label htmlFor={`type-${type}`}>{type}</label>
+            </div>
+          ))}
+        </div>
+
+        <QuestionStatisticsCharts />
+      </div>
+
+      <div className="main-content">
+        <div className="search-and-sort">
+          <div className="search-container">
+            <input
+              type="text"
+              placeholder="Search questions..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
+          </div>
+          <select
+            className="order-by-select"
+            value={orderBy}
+            onChange={handleOrderByChange}
+          >
+            <option value="difficulty">Sort by Difficulty</option>
+            <option value="date">Sort by Date</option>
+          </select>
+        </div>
+
+        <div className="questions-list">
+          {paginatedQuestions.map((question) => (
+            <div key={question.id} className="question-item">
+              <div className="question-content">
+                <h2 className="question-text">{question.questionText}</h2>
+                <div className="question-footer">
+                  <div className="question-details">
+                    <div className="detail-item">
+                      <span className="detail-label">Category:</span>
+                      <span className="detail-value">{question.category}</span>
+                    </div>
+                    <div className="detail-item">
+                      <span className="detail-label">Type:</span>
+                      <span className="detail-value">{question.type}</span>
+                    </div>
+                    <div className="detail-item">
+                      <span className="detail-label">Difficulty:</span>
+                      <span className="detail-value">
+                        {question.difficulty}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    className="see-more-btn"
+                    onClick={() => handleQuestionClick(question.id)}
+                  >
+                    See more info
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {totalPages > 1 && (
+          <div className="pagination">{renderPagination()}</div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default QuestionsPage;
