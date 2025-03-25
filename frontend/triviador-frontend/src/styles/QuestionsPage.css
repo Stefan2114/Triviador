@@ -1,0 +1,136 @@
+.questions-container {
+  display: flex;
+  max-width: 1400px; /* Increased max-width for more space */
+  margin: 0 auto;
+  padding: 20px;
+  gap: 30px; /* Increased gap */
+}
+
+.sidebar {
+  width: 300px; /* Slightly wider sidebar */
+  padding: 25px;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  position: sticky;
+  top: 20px;
+  height: fit-content;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05); /* Added subtle shadow */
+}
+
+.main-content {
+  flex-grow: 1;
+  overflow: hidden;
+  width: calc(100% - 330px); /* Adjusted for wider sidebar */
+}
+
+.search-and-sort {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.search-container {
+  position: relative;
+  flex-grow: 1;
+  max-width: 600px; /* Increased max-width */
+  margin-right: 20px;
+}
+
+.search-container input {
+  width: 100%;
+  padding: 15px 20px; /* Increased padding */
+  border: 2px solid #e0e0e0; /* Slightly more pronounced border */
+  border-radius: 8px;
+  font-size: 18px; /* Larger font size */
+  transition: all 0.3s ease;
+}
+
+.search-container input:focus {
+  outline: none;
+  border-color: #333;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+}
+
+.create-button {
+  background-color: #000000;
+  color: white;
+  padding: 15px 25px; /* Increased padding */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 20px;
+  font-size: 18px; /* Larger font size */
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.create-button:hover {
+  background-color: #1a1a1a;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+}
+
+.questions-list {
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  width: 100%;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 25px;
+  padding: 15px 0;
+  border-top: 1px solid #f0f0f0;
+}
+
+.pagination button {
+  margin: 0 8px;
+  padding: 10px 16px;
+  border: 2px solid #e0e0e0;
+  background-color: #f9f9f9;
+  color: #333;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  min-width: 45px;
+}
+
+.pagination button:hover {
+  background-color: #f0f0f0;
+  border-color: #999;
+}
+
+.pagination button.active-page {
+  background-color: black;
+  color: white;
+  border-color: black;
+  font-weight: bold;
+}
+
+.pagination button:disabled {
+  background-color: #f0f0f0;
+  color: #999;
+  cursor: not-allowed;
+  border-color: #ddd;
+}
+
+.order-by-select {
+  padding: 10px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 16px;
+}
