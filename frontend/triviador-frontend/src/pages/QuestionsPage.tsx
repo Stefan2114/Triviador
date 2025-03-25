@@ -143,10 +143,6 @@ const QuestionsPage = () => {
     return pages;
   };
 
-  const handleQuestionClick = (questionId: number) => {
-    navigate(`/questions/${questionId}`);
-  };
-
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
@@ -248,7 +244,6 @@ const QuestionsPage = () => {
             <QuestionItem
               key={question.id}
               question={question}
-              onSeeMoreClick={handleQuestionClick}
               difficultyCounts={difficultyCounts}
             />
           ))}

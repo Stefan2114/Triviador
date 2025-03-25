@@ -1,18 +1,19 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Question } from "../types/question";
 import "../styles/QuestionItem.css";
 
 interface QuestionItemProps {
   question: Question;
-  onSeeMoreClick: (questionId: number) => void;
   difficultyCounts: Record<number, number>;
 }
 
 const QuestionItem: React.FC<QuestionItemProps> = ({
   question,
-  onSeeMoreClick,
   difficultyCounts,
 }) => {
+  const navigate = useNavigate();
+
   // Determine color based on difficulty distribution
   const getDifficultyColor = () => {
     const counts = Object.values(difficultyCounts);
@@ -26,6 +27,11 @@ const QuestionItem: React.FC<QuestionItemProps> = ({
       return "#4CAF50"; // Green for highest count
     }
     return "#8884d8"; // Default color
+  };
+
+  // Handler for navigating to question details
+  const handleSeeMoreClick = () => {
+    navigate(`/questions/${question.id}`);
   };
 
   return (
@@ -63,10 +69,7 @@ const QuestionItem: React.FC<QuestionItemProps> = ({
               </span>
             </span>
           </div>
-          <button
-            className="see-more-btn"
-            onClick={() => onSeeMoreClick(question.id)}
-          >
+          <button className="see-more-btn" onClick={handleSeeMoreClick}>
             See more info
           </button>
         </div>
